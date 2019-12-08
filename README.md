@@ -91,27 +91,30 @@ EOF
 
 cat > /etc/dracut.conf.d/vfio.conf << "EOF"
 add_drivers+="vfio vfio_iommu_type1 vfio_pci vfio_virqfd"
-install_items+="/sbin/vfio-pci-override.sh /usr/bin/dirname"
+hostonly="yes"
+hostonly_cmdline="amd_iommu=on iommu=pt"
+force_drivers+="vfio_pci vfio vfio_iommu_type1 vfio_virqfd"
+install_items+="/sbin/vfio-pci-override.sh /sbin/dirname"
 EOF
 
 cat > /sbin/vfio-pci-override.sh << "EOF"
-#!/bin/sh
+#!/bin/bash
 
-echo "vfio-pci-override running"
+echo "vfio-pci-override running" > /dev/kmsg
 set -u
 
 for boot_vga in /sys/bus/pci/devices/*/boot_vga; do
-  echo "Found vga device: ${boot_vga}"
+  echo "Found vga device: ${boot_vga}" > /dev/kmsg
   if [ $(<"${boot_vga}") -eq 0 ]; then
-    echo "Found Boot VGA Device - false: ${boot_vga}"
+    echo "Found Boot VGA Device - false: ${boot_vga}" > /dev/kmsg
 
     dir=$(dirname -- "${boot_vga}")
     for dev in "${dir::-1}"*; do
-      echo "Registering Devices: ${dev}"
+      echo "Registering Devices: ${dev}" > /dev/kmsg
       echo 'vfio-pci' > "${dev}/driver_override"
     done
   else
-    echo "Found Boot VGA Device - true: ${boot_vga}"
+    echo "Found Boot VGA Device - true: ${boot_vga}" > /dev/kmsg
   fi
 done
 
