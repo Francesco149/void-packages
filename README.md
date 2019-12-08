@@ -15,7 +15,7 @@ cd void-packages
 
 build the kernel. you will be interactively asked to configure each tweak
 
-``sh
+```sh
 ./xbps-src clean linux5.4 && ./xbps-src pkg linux5.4
 ```
 
