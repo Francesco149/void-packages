@@ -1,3 +1,37 @@
+this fork of void-packages contains a linux5.4 kernel patched with the
+[tkg patches](https://github.com/Tk-Glitch/PKGBUILDS/tree/master/linux54-tkg)
+which is aimed at improving gaming performance as well as making gpu
+passthrough easier with the acs override patch
+
+## building and installing the kernel
+
+set up my void-packages fork
+
+```sh
+git clone git://github.com/Francesco149/void-packages.git
+cd void-packages
+./xbps-src binary-bootstrap
+```
+
+build the kernel. you will be interactively asked to configure each tweak
+
+``sh
+./xbps-src clean linux5.4 && ./xbps-src pkg linux5.4
+```
+
+install
+
+```sh
+sudo xbps-install --force --repository=hostdir/binpkgs/linux5.4-tkg/ linux5.4 linux5.4-headers
+```
+
+reboot. to verify that you are booted into the modified kernel you can
+check that the config contains a PBS scheduler
+
+```sh
+gunzip < /proc/config.gz  | grep SCHED_PDS
+```
+
 ## The XBPS source packages collection
 
 This repository contains the XBPS source packages collection to build binary packages
