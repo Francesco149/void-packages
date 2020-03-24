@@ -1,3 +1,38 @@
+# ungoogled chromium for void
+
+this fork adds ungoogled patches to chromium
+
+installing:
+
+```
+git clone --single-branch --branch ungoogled git://github.com/Francesco149/void-packages.git
+cd void-packages
+./xbps-src binary-bootstrap
+./xbps-src clean chromium
+./xbps-src pkg -o ~js_optimize chromium
+sudo xbps-install --force --repository ./hostdir/binpkgs/ungoogled chromium
+xbps-pkgdb -m hold chromium
+```
+
+updating:
+
+```
+cd /path/to/void-packages
+git pull
+./xbps-src bootstrap-update
+./xbps-src clean chromium
+./xbps-src pkg -o ~js_optimize chromium
+sudo xbps-install --force --repository ./hostdir/binpkgs/ungoogled chromium
+```
+
+uninstalling:
+
+```
+xbps-pkgdb -m unhold chromium
+sudo xbps-remove -R chromium
+sudo xbps-install chromium
+```
+
 ## The XBPS source packages collection
 
 This repository contains the XBPS source packages collection to build binary packages
