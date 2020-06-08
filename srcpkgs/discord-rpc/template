@@ -1,0 +1,28 @@
+# Template file for 'discord-rpc'
+pkgname=discord-rpc
+version=3.4.0
+revision=1
+build_style=cmake
+configure_args="-DBUILD_SHARED_LIBS=ON"
+short_desc="Libraries for Discord Rich Presence"
+maintainer="Franc[e]sco <lolisamurai@tfwno.gf>"
+license="MIT"
+homepage="https://github.com/discordapp/discord-rpc"
+distfiles="https://github.com/discordapp/discord-rpc/archive/v${version}.tar.gz>${pkgname}-${version}.tar.gz"
+checksum=e13427019027acd187352dacba6c65953af66fdf3c35fcf38fc40b454a9d7855
+
+pre_configure() {
+	# .so is unversioned by default
+	sed -i "s/install(/\
+		set_target_properties(discord-rpc PROPERTIES VERSION ${version} SOVERSION 3.0.0)\n&/" \
+		src/CMakeLists.txt
+}
+
+discord-rpc-devel_package() {
+	depends="${sourcepkg}>=${version}_${revision}"
+	short_desc+=" - development files"
+	pkg_install() {
+		vmove usr/include
+		vmove "usr/lib/*.so"
+	}
+}
