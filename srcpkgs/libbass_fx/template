@@ -1,0 +1,49 @@
+# Template file for 'libbass_fx'
+pkgname=libbass_fx
+version=2.4.12.1
+revision=1
+archs="i686 x86_64 arm* aarch64*"
+create_wrksrc=yes
+hostmakedepends="unzip"
+depends="alsa-lib"
+short_desc="BASS audio library - Effects Add-On"
+maintainer="Franc[e]sco <lolisamurai@tfwno.gf>"
+license="custom:Proprietary"
+homepage="https://www.un4seen.com/"
+repository=nonfree
+restricted=yes
+nostrip=yes
+
+case "$XBPS_TARGET_MACHINE" in
+	x86_64|i686)
+		checksum="362e1d84475dd35374547b56904394526cc4e2b2f68d55f4c51dfa783e390fe0"
+		distfiles="http://dl.un4seen.com/files/z/0/bass_fx24-linux.zip>${pkgname}-${version}.zip"
+	;;
+	arm*|aarch64*)
+		checksum="f7bc36320110c8fd2f87c6d2bb5df6d2231ca9ab31a299b1565de63f7681cc83"
+		distfiles="http://www.un4seen.com/files/z/0/bass_fx24-linux-arm.zip>${pkgname}-${version}.zip"
+	;;
+esac
+
+do_install() {
+	vinstall C/bass_fx.h 644 /usr/include/
+	vdoc bass_fx.chm
+	case "$XBPS_TARGET_MACHINE" in
+		i686) _libfile=libbass_fx.so ;;
+		x86_64) _libfile=x64/libbass_fx.so ;;
+		arm*) _libfile=arm/hardfp/libbass_fx.so ;;
+		aarch64*) _libfile=arm/aarch64/libbass_fx.so ;;
+	esac
+	vinstall ${_libfile} 755 /usr/lib/ libbass_fx.so.${version}
+	ln -s libbass_fx.so.${version} "${DESTDIR}/usr/lib/libbass_fx.so"
+	vlicense "${FILESDIR}/LICENSE"
+}
+
+libbass_fx-devel_package() {
+	short_desc+=" - development files"
+	depends="${sourcepkg}>=${version}_${revision}"
+	pkg_install() {
+		vmove usr/include
+		vmove "usr/lib/*.so"
+	}
+}
