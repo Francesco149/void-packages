@@ -1,0 +1,26 @@
+# Template file for 'miniz'
+pkgname=miniz
+version=2.1.0
+revision=1
+build_style=cmake
+configure_args="-DBUILD_SHARED_LIBS=ON -DBUILD_EXAMPLES=OFF"
+short_desc="Small zlib-replacement library"
+maintainer="Franc[e]sco <lolisamurai@tfwno.gf>"
+license="MIT"
+homepage="https://github.com/richgel999/miniz"
+distfiles="https://github.com/richgel999/miniz/archive/${version}.tar.gz>${pkgname}-${version}.tar.gz"
+checksum=95f9b23c92219ad2670389a23a4ed5723b7329c82c3d933b7047673ecdfc1fea
+
+post_install() {
+	vlicense LICENSE
+}
+
+miniz-devel_package() {
+	short_desc+=" - development files"
+	depends="${makedepends} ${sourcepkg}>=${version}_${revision}"
+	pkg_install() {
+		vmove usr/include
+		vmove "usr/lib/*.so"
+		vmove usr/lib/cmake
+	}
+}
