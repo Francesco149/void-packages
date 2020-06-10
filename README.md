@@ -25,6 +25,12 @@ install
 sudo xbps-install --force --repository=hostdir/binpkgs/linux5.6-tkg/ linux5.6 linux5.6-headers
 ```
 
+prevent xbps from updating the kernel
+
+```sh
+sudo xbps-pkgdb -m hold linux5.6{,-headers}
+```
+
 reboot. to verify that you are booted into the modified kernel you can
 check that the config contains a PBS scheduler
 
