@@ -1,0 +1,28 @@
+# Template file for 'python-blist'
+pkgname=python-blist
+version=1.3.6
+revision=1
+wrksrc="${pkgname#*-}-${version}"
+build_style=python-module
+pycompile_module="${pkgname#*-}"
+hostmakedepends="python-devel python3-devel python-setuptools python3-setuptools"
+makedepends="python-devel python3-devel"
+short_desc="drop-in replacement for the Python list with better performance (Python2)"
+maintainer="Franc[e]sco <lolisamurai@tfwno.gf>"
+license="BSD-3-Clause"
+homepage="https://pypi.org/project/blist/"
+distfiles="${PYPI_SITE}/b/blist/blist-${version}.tar.gz"
+checksum=3a12c450b001bdf895b30ae818d4d6d3f1552096b8c995f0fe0c74bef04d1fc3
+
+post_install() {
+	vlicense LICENSE
+}
+
+python3-blist_package() {
+	depends="python3"
+	short_desc="${short_desc/Python2/Python3}"
+	pkg_install() {
+		vmove "usr/lib/python3*"
+		vlicense LICENSE
+	}
+}
