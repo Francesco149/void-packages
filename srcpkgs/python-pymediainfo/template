@@ -1,0 +1,31 @@
+# Template file for 'python-pymediainfo'
+pkgname=python-pymediainfo
+version=4.2.1
+revision=1
+archs=noarch
+wrksrc="${pkgname#*-}-${version}"
+build_style=python-module
+pycompile_module="pymediainfo"
+hostmakedepends="python-setuptools python3-setuptools"
+depends="python libmediainfo"
+short_desc="A Python2 wrapper for the mediainfo library"
+maintainer="Franc[e]sco <lolisamurai@tfwno.gf>"
+license="MIT"
+homepage="https://pymediainfo.readthedocs.io/"
+distfiles="${PYPI_SITE}/p/${pkgname#*-}/${pkgname#*-}-${version}.tar.gz"
+checksum=392d99d6bf74046ebaa2f7036d92d5327611d27532a384540e9310a62b8be26d
+
+post_install() {
+	vlicense LICENSE
+}
+
+python3-pymediainfo_package() {
+	archs=noarch
+	depends="python3"
+	pycompile_module="pymediainfo"
+	short_desc="${short_desc/Python2/Python3}"
+	pkg_install() {
+		vmove usr/lib/python3*
+		vlicense LICENSE
+	}
+}
