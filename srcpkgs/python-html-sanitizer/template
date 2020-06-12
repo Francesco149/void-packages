@@ -1,0 +1,31 @@
+# Template file for 'python-html-sanitizer'
+pkgname=python-html-sanitizer
+version=1.9.1
+revision=1
+archs=noarch
+wrksrc="${pkgname#*-}-${version}"
+build_style=python-module
+pycompile_module="html_sanitizer"
+hostmakedepends="python-setuptools python3-setuptools"
+depends="python"
+short_desc="Allowlist-based HTML cleaner"
+maintainer="Franc[e]sco <lolisamurai@tfwno.gf>"
+license="BSD-3-Clause"
+homepage="https://github.com/matthiask/html-sanitizer/"
+distfiles="${PYPI_SITE}/h/${pkgname#*-}/${pkgname#*-}-${version}.tar.gz"
+checksum=13c0aebe3ceff55540e37ee8717181ce314a8bedb92e1cb322be6455016a69d5
+
+post_install() {
+	vlicense LICENSE
+}
+
+python3-html-sanitizer_package() {
+	archs=noarch
+	depends="python3"
+	pycompile_module="html-sanitizer"
+	short_desc="${short_desc/Python2/Python3}"
+	pkg_install() {
+		vmove usr/lib/python3*
+		vlicense LICENSE
+	}
+}
