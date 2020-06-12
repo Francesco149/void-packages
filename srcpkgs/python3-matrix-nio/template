@@ -1,0 +1,22 @@
+# Template file for 'python3-matrix-nio'
+pkgname=python3-matrix-nio
+version=0.13.0
+revision=1
+archs=noarch
+wrksrc="${pkgname#*-}-${version}"
+build_style=python3-module
+pycompile_module="nio"
+hostmakedepends="python3-setuptools"
+depends="python3 python3-aiofiles python3-aiohttp python3-future python3-h11 python3-hyper-h2
+ python3-jsonschema python3-logbook python3-pycryptodome python3-unpaddedbase64 olm-python3
+ python3-cachetools python3-atomicwrites"
+short_desc="A Python Matrix client library, designed according to sans I/O principles."
+maintainer="Franc[e]sco <lolisamurai@tfwno.gf>"
+license="custom"
+homepage="https://matrix-nio.readthedocs.io/"
+distfiles="${PYPI_SITE}/m/${pkgname#*-}/${pkgname#*-}-${version}.tar.gz"
+checksum=466217e538ca54a5d8b0fd65b035834aaa7e02eb30853f3e16bb921f7636d623
+
+post_install() {
+	vlicense LICENSE.md
+}
