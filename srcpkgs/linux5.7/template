@@ -12,6 +12,10 @@ checksum=f840b9679283343c165516585c3070ebb277528721c890e9410a58e9d071ee7f
 python_version=3
 patch_args="-Np1"
 
+# attempt to override version so xbps doesn't update it
+_baseversion="${version}"
+version="9999tkg.${_baseversion}"
+
 # XXX Restrict archs until a proper <arch>-dotconfig is available in FILESDIR.
 archs="x86_64* i686* mips* ppc* aarch64*"
 
@@ -24,7 +28,7 @@ preserve=yes
 hostmakedepends="tar xz bc elfutils-devel flex gmp-devel kmod libmpc-devel
  libressl-devel perl uboot-mkimage cpio"
 
-_kernver="${version}_${revision}"
+_kernver="${_baseversion}_${revision}-tkg"
 triggers="kernel-hooks"
 kernel_hooks_version="${_kernver}"
 
@@ -82,7 +86,7 @@ do_configure() {
 		make ${makejobs} ARCH=$arch ${_args} allmodconfig
 	fi
 	# Always use our revision to CONFIG_LOCALVERSION to match our pkg version.
-	sed -i -e "s|^\(CONFIG_LOCALVERSION=\).*|\1\"_${revision}\"|" .config
+	sed -i -e "s|^\(CONFIG_LOCALVERSION=\).*|\1\"_${revision}-tkg\"|" .config
 }
 
 do_build() {

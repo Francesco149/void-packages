@@ -1,3 +1,132 @@
+this fork of void-packages contains a linux5.7 kernel patched with the
+[tkg patches](https://github.com/Tk-Glitch/PKGBUILDS/tree/master/linux56-tkg)
+which is aimed at improving gaming performance as well as making gpu
+passthrough easier with the acs override patch
+
+## building and installing the kernel
+
+set up my void-packages fork
+
+```sh
+git clone git://github.com/Francesco149/void-packages.git
+cd void-packages
+./xbps-src binary-bootstrap
+```
+
+build the kernel. you will be interactively asked to configure each tweak
+
+```sh
+./xbps-src clean linux5.7 && ./xbps-src pkg linux5.7
+```
+
+install
+
+```sh
+sudo xbps-install --force --repository=hostdir/binpkgs/linux5.7-tkg/ linux5.7 linux5.7-headers
+```
+
+now you can edit /etc/default/grub to enable features from the commandline
+
+after the edits, regenerate your initramfs and grub and reboot
+
+```sh
+sudo dracut --force --regenerate-all
+sudo grub-mkconfig -o /boot/grub/grub.cfg
+```
+
+to verify that you are booted into the modified kernel you can
+check that the config contains a PBS scheduler
+
+```sh
+gunzip < /proc/config.gz  | grep SCHED_PDS
+```
+
+note that kernel updates beyond the patched version will install an un-patched kernel so you will
+have to manually select the old version from grub if that happens. I have appended `tkg` to the
+version number in an attempt to prevent this, but I'm not sure
+
+my personal gaming setup has acs override for gpu passthrough, iommu,
+1ms kb/mouse/joystick poll rate, disabled all spectre/meltdown mitigations
+(use at your own risk), and reserves 1x8GB of hugepages for virtual
+machines at boot
+
+```
+#
+# Configuration file for GRUB.
+#
+GRUB_DEFAULT=0
+#GRUB_HIDDEN_TIMEOUT=0
+#GRUB_HIDDEN_TIMEOUT_QUIET=false
+GRUB_TIMEOUT=5
+GRUB_DISTRIBUTOR="Void"
+cmdline="$cmdline loglevel=4 slub_debug=P page_poison=1"
+cmdline="$cmdline radeon.si_support=0 amdgpu.si_support=1 radeon.cik_support=0 amdgpu.cik_support=1"
+cmdline="$cmdline usbhid.kbpoll=1 usbhid.mousepoll=1 usbhid.jspoll=1"
+cmdline="$cmdline noibrs noibpb nopti nospectre_v2 nospectre_v1 l1tf=off nospec_store_bypass_disable"
+cmdline="$cmdline no_stf_barrier mds=off mitigations=off"
+cmdline="$cmdline amd_iommu=on intel_iommu=on iommu=pt rd.driver.pre=vfio-pci"
+cmdline="$cmdline pcie_acs_override=downstream,multifunction"
+cmdline="$cmdline default_hugepagesz=1GB hugepagesz=1GB hugepages=8"
+GRUB_CMDLINE_LINUX_DEFAULT="$cmdline"
+# Uncomment to use basic console
+#GRUB_TERMINAL_INPUT="console"
+# Uncomment to disable graphical terminal
+#GRUB_TERMINAL_OUTPUT=console
+#GRUB_BACKGROUND=/usr/share/void-artwork/splash.png
+#GRUB_GFXMODE=1920x1080x32
+#GRUB_DISABLE_LINUX_UUID=true
+#GRUB_DISABLE_RECOVERY=true
+# Uncomment and set to the desired menu colors.  Used by normal and wallpaper
+# modes only.  Entries specified as foreground/background.
+#GRUB_COLOR_NORMAL="light-blue/black"
+#GRUB_COLOR_HIGHLIGHT="light-cyan/blue"
+```
+
+I also have these scripts that load vfio and passthrough every gpu except
+the boot gpu
+
+they are based on:
+https://qubitrenegade.com/virtualization/kvm/vfio/2019/07/17/VFIO-Fedora-Notes.html
+
+```sh
+cat > /etc/modprobe.d/vfio.conf << "EOF"
+install vfio-pci /sbin/vfio-pci-override.sh
+EOF
+
+cat > /etc/dracut.conf.d/vfio.conf << "EOF"
+add_drivers+="vfio vfio_iommu_type1 vfio_pci vfio_virqfd"
+hostonly="yes"
+hostonly_cmdline="amd_iommu=on iommu=pt"
+force_drivers+="vfio_pci vfio vfio_iommu_type1 vfio_virqfd"
+install_items+="/sbin/vfio-pci-override.sh /sbin/dirname"
+EOF
+
+cat > /sbin/vfio-pci-override.sh << "EOF"
+#!/bin/bash
+
+echo "vfio-pci-override running" > /dev/kmsg
+set -u
+
+for boot_vga in /sys/bus/pci/devices/*/boot_vga; do
+  echo "Found vga device: ${boot_vga}" > /dev/kmsg
+  if [ $(<"${boot_vga}") -eq 0 ]; then
+    echo "Found Boot VGA Device - false: ${boot_vga}" > /dev/kmsg
+
+    dir=$(dirname -- "${boot_vga}")
+    for dev in "${dir::-1}"*; do
+      echo "Registering Devices: ${dev}" > /dev/kmsg
+      echo 'vfio-pci' > "${dev}/driver_override"
+    done
+  else
+    echo "Found Boot VGA Device - true: ${boot_vga}" > /dev/kmsg
+  fi
+done
+
+modprobe -i vfio-pci
+EOF
+chmod +x /sbin/vfio-pci-override.sh
+```
+
 ## The XBPS source packages collection
 
 This repository contains the XBPS source packages collection to build binary packages
