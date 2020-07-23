@@ -1,0 +1,50 @@
+# Template file for 'Quake3e'
+pkgname=Quake3e
+_tag="2020-07-05"
+version="$(echo "${_tag}" | sed s/-//g)"
+wrksrc="${pkgname}-${_tag}"
+revision=1
+makedepends="Vulkan-Headers vulkan-loader MesaLib-devel alsa-lib-devel libXxf86dga-devel
+ libXxf86vm-devel libXrandr-devel libcurl-devel libjpeg-turbo-devel"
+short_desc="Improved Quake III Arena engine"
+maintainer="Franc[e]sco <lolisamurai@tfwno.gf>"
+license="GPL-2.0-or-later"
+homepage="https://github.com/ec-/Quake3e"
+distfiles="https://github.com/ec-/Quake3e/archive/2020-07-05.tar.gz"
+checksum=e30d2a3b1a9482b4eb1a139b9e0a309ae10e3c9ca0dc8ce704b87639047bda21
+
+LDFLAGS+=" -lm -ldl "
+
+_do_make() {
+	make ${makejobs} CC="$CC" CXX="$CXX" LD="$LD" CFLAGS="$CFLAGS" LDFLAGS="$LDFLAGS" \
+		USE_SYSTEM_JPEG=1 "$@"
+}
+
+do_build() {
+	cd "${wrksrc}"
+	_do_make BUILD_SERVER=0 USE_VULKAN=1
+	_buildbase="build/release-linux-"
+	mv "${_buildbase}"*"/quake3e."* ./quake3e.vulkan
+	rm -rf build
+	_do_make BUILD_SERVER=1
+	mv "${_buildbase}"*"/quake3e.ded."* ./quake3e.ded
+	mv "${_buildbase}"*"/quake3e."* ./quake3e
+}
+
+do_install() {
+	vbin quake3e
+	vbin quake3e.vulkan
+	vbin quake3e.ded
+}
+
+Quake3e-vulkan_package() {
+	pkg_install() {
+		vmove /usr/bin/quake3e.vulkan
+	}
+}
+
+Quake3e-ded_package() {
+	pkg_install() {
+		vmove /usr/bin/quake3e.ded
+	}
+}
